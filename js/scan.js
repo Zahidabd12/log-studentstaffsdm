@@ -15,17 +15,17 @@ onAuthStateChanged(auth, user => {
 });
 
 function runScanApp(currentUser) {
+    const welcomeMsgEl = document.getElementById('welcome-message');
     const statusEl = document.getElementById('presence-status');
     const infoEl = document.getElementById('presence-info');
-    const scanBtn = document.getElementById('scan-button');
+    const actionBtn = document.getElementById('action-button');
     const resetBtn = document.getElementById('reset-button');
-    const cameraContainer = document.getElementById('camera-container');
-    const video = document.getElementById('camera-feed');
-    const cancelScanBtn = document.getElementById('cancel-scan-btn');
     const logoutBtn = document.getElementById('logout-btn');
-    let stream = null;
+    const clockEl = document.getElementById('live-clock-intern');
 
-    // Kunci dokumen di Firestore sekarang: UID_YYYY-MM-DD
+    welcomeMsgEl.textContent = `Selamat Datang, ${currentUser.displayName}!`;
+    setInterval(() => { clockEl.textContent = new Date().toLocaleTimeString('id-ID', {timeStyle: 'medium'}); }, 1000);
+
     const getTodayDocId = () => `${currentUser.uid}_${new Date().toISOString().slice(0, 10)}`;
 
     const checkStatus = async () => {
@@ -36,96 +36,74 @@ function runScanApp(currentUser) {
 
         resetBtn.classList.add('hidden');
         if (!todayPresence) {
-            statusEl.textContent = "Anda Belum Clock In";
-            infoEl.textContent = "Silakan pindai QR Code 'CLOCK IN' untuk memulai.";
-            scanBtn.textContent = "Pindai untuk Clock In";
-            scanBtn.className = "action-button clock-in";
-            scanBtn.disabled = false;
+            statusEl.textContent = "Siap untuk Bekerja?";
+            infoEl.textContent = "Klik tombol di bawah untuk mencatat jam masuk Anda.";
+            actionBtn.textContent = "Clock In";
+            actionBtn.className = "action-button clock-in";
+            actionBtn.disabled = false;
         } else if (todayPresence && !todayPresence.jamPulang) {
-            statusEl.textContent = "Anda Sudah Clock In";
-            infoEl.textContent = `Waktu masuk: ${todayPresence.jamMasuk}`;
-            scanBtn.textContent = "Pindai untuk Clock Out";
-            scanBtn.className = "action-button clock-out";
-            scanBtn.disabled = false;
+            statusEl.textContent = "Anda Sedang Bekerja";
+            infoEl.textContent = `Waktu masuk tercatat pukul: ${todayPresence.jamMasuk}`;
+            actionBtn.textContent = "Clock Out";
+            actionBtn.className = "action-button clock-out";
+            actionBtn.disabled = false;
         } else {
             statusEl.textContent = "Presensi Hari Ini Selesai";
             infoEl.textContent = `Masuk: ${todayPresence.jamMasuk} | Pulang: ${todayPresence.jamPulang}`;
-            scanBtn.textContent = "Selesai";
-            scanBtn.className = "action-button";
-            scanBtn.disabled = true;
+            actionBtn.textContent = "Selesai";
+            actionBtn.className = "action-button";
+            actionBtn.disabled = true;
             resetBtn.classList.remove('hidden');
         }
     };
-    
-    const handleQRCode = async (data) => {
-        stopScanner();
+
+    const handlePresenceAction = async () => {
+        actionBtn.disabled = true;
         const todayString = new Date().toISOString().slice(0, 10);
-        const expectedClockIn = `PRESENSI_MASUK_${todayString}`;
-        const expectedClockOut = `PRESENSI_PULANG_${todayString}`;
         const currentTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-        
         const docId = getTodayDocId();
         const presenceRef = doc(db, "presence_status", docId);
         const presenceSnap = await getDoc(presenceRef);
         const todayPresence = presenceSnap.exists() ? presenceSnap.data() : null;
 
         try {
-            if (data === expectedClockIn && !todayPresence) {
-                // Buat dokumen presensi baru di Firestore
+            if (!todayPresence) {
                 await setDoc(presenceRef, {
-                    jamMasuk: currentTime,
-                    jamPulang: null,
-                    logId: null,
-                    displayName: currentUser.displayName,
-                    tanggal: todayString, // Tambahkan tanggal untuk query notifikasi
+                    jamMasuk: currentTime, jamPulang: null, logId: null,
+                    displayName: currentUser.displayName, tanggal: todayString,
                 });
                 alert(`Berhasil Clock In pada jam ${currentTime}`);
-            } else if (data === expectedClockOut && todayPresence && !todayPresence.jamPulang) {
+            } else if (todayPresence && !todayPresence.jamPulang) {
                 const newLogId = Date.now().toString();
-                // Update dokumen presensi di Firestore
-                await updateDoc(presenceRef, {
-                    jamPulang: currentTime,
-                    logId: newLogId
-                });
-
-                // Buat dokumen log baru di koleksi 'logs'
+                await updateDoc(presenceRef, { jamPulang: currentTime, logId: newLogId });
                 const newLog = {
                     tanggal: todayString, jamMasuk: todayPresence.jamMasuk, jamPulang: currentTime,
                     durasi: calculateDuration(todayPresence.jamMasuk, currentTime),
-                    kegiatan: "Aktivitas harian tercatat melalui presensi QR.",
+                    kegiatan: "Aktivitas harian tercatat melalui presensi.",
                     userId: currentUser.uid
                 };
                 await setDoc(doc(db, "logs", newLogId), newLog);
                 alert(`Berhasil Clock Out pada jam ${currentTime}.`);
-            } else {
-                alert("QR Code tidak valid atau status presensi tidak sesuai.");
             }
-        } catch (error) {
-            console.error("Error handling QR Code: ", error);
-            alert("Terjadi kesalahan saat memproses data.");
-        } finally {
-            checkStatus();
-        }
+        } catch (error) { console.error("Error:", error); alert("Terjadi kesalahan."); } 
+        finally { checkStatus(); }
     };
-    
+
     const resetPresence = async () => {
         if (confirm("Yakin ingin mereset presensi hari ini? Log terkait juga akan dihapus.")) {
             const docId = getTodayDocId();
             const presenceRef = doc(db, "presence_status", docId);
             const presenceSnap = await getDoc(presenceRef);
-
             if (presenceSnap.exists()) {
                 const presenceData = presenceSnap.data();
-                if (presensiData.logId) {
-                    await deleteDoc(doc(db, "logs", presensiData.logId));
-                }
+                if (presensiData.logId) await deleteDoc(doc(db, "logs", presensiData.logId));
                 await deleteDoc(presenceRef);
                 alert("Presensi hari ini telah direset.");
                 checkStatus();
             }
         }
     };
-
+    
     const calculateDuration = (startTime, endTime) => {
         const start = new Date(`1970-01-01T${startTime}`); const end = new Date(`1970-01-01T${endTime}`);
         if (end < start) return { totalMinutes: 0, text: "0j 0m" };
@@ -133,15 +111,11 @@ function runScanApp(currentUser) {
         const hours = Math.floor(totalMinutes / 60); const minutes = totalMinutes % 60;
         return { totalMinutes, text: `${hours}j ${minutes}m` };
     };
-
-    const startScanner = () => { navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(s => { stream = s; video.srcObject = stream; video.play(); cameraContainer.classList.remove('hidden'); document.getElementById('status-display').classList.add('hidden'); scanBtn.classList.add('hidden'); requestAnimationFrame(tick); }).catch(() => alert("Tidak dapat mengakses kamera.")); };
-    const stopScanner = () => { if (stream) { stream.getTracks().forEach(track => track.stop()); stream = null; } cameraContainer.classList.add('hidden'); document.getElementById('status-display').classList.remove('hidden'); scanBtn.classList.remove('hidden'); };
-    const tick = () => { if (video.readyState === video.HAVE_ENOUGH_DATA) { const canvas = document.createElement('canvas'); canvas.width = video.videoWidth; canvas.height = video.videoHeight; const ctx = canvas.getContext('2d'); ctx.drawImage(video, 0, 0, canvas.width, canvas.height); const code = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height); if (code) { handleQRCode(code.data); return; } } if (stream) { requestAnimationFrame(tick); } };
-
-    scanBtn.addEventListener('click', startScanner);
+    
+    actionBtn.addEventListener('click', handlePresenceAction);
     resetBtn.addEventListener('click', resetPresence);
-    cancelScanBtn.addEventListener('click', stopScanner);
-    logoutBtn.addEventListener('click', (e) => { e.preventDefault(); if (confirm('Yakin logout?')) { signOut(auth).then(() => window.location.replace('login.html')).catch(err => console.error(err)); } });
+    logoutBtn.addEventListener('click', (e) => { e.preventDefault(); if (confirm('Yakin logout?')) { signOut(auth).then(() => window.location.replace('login.html')); } });
+    
     const currentPage = window.location.pathname.split('/').pop();
     if (currentPage === 'scan.html') document.getElementById('nav-scan').classList.add('active');
     
