@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div id="notification" class="notification hidden"><p id="notification-text"></p></div>
     <div class="main-container">
         <header class="main-header">
             <h1>Presensi Kehadiran Magang</h1>
@@ -18,22 +19,12 @@
             <p id="current-time"></p>
         </div>
         <main class="qr-container">
-            <div class="qr-card">
-                <h2>CLOCK IN</h2>
-                <div id="qr-masuk" class="qr-code"></div>
-                <p>Pindai untuk Mencatat Jam Masuk</p>
-            </div>
-            <div class="qr-card">
-                <h2>CLOCK OUT</h2>
-                <div id="qr-pulang" class="qr-code"></div>
-                <p>Pindai untuk Mencatat Jam Pulang</p>
-            </div>
+            <div class="qr-card"><h2>CLOCK IN</h2><div id="qr-masuk" class="qr-code"></div><p>Pindai untuk Mencatat Jam Masuk</p></div>
+            <div class="qr-card"><h2>CLOCK OUT</h2><div id="qr-pulang" class="qr-code"></div><p>Pindai untuk Mencatat Jam Pulang</p></div>
         </main>
-        <footer>
-            <p>Buka halaman `scan.html` di HP untuk memindai.</p>
-        </footer>
+        <footer><p>Akses halaman `scan.html` di HP untuk memindai.</p></footer>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.js"></script>
-    <script src="js/main.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
 </html>

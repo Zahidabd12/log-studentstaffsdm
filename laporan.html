@@ -9,31 +9,21 @@
 </head>
 <body>
     <nav class="main-nav">
-        <a href="presensi.html">Presensi</a>
-        <a href="log.html">Log Harian</a>
-        <a href="laporan.html" class="active">Laporan</a>
+        <a href="scan.html" id="nav-scan">Pindai QR</a>
+        <a href="log.html" id="nav-log">Log Harian</a>
+        <a href="laporan.html" id="nav-laporan">Laporan</a>
+        <a href="#" id="logout-btn" class="logout">Logout</a>
     </nav>
-
     <div class="container">
         <header class="report-header">
             <h1>Laporan Aktivitas Magang</h1>
             <div class="filter-controls">
-                <div class="date-range">
-                    <label for="start-date">Dari:</label>
-                    <input type="date" id="start-date">
-                    <label for="end-date">Sampai:</label>
-                    <input type="date" id="end-date">
-                </div>
-                <button id="generate-report-btn">Buat Laporan</button>
-                <button id="print-btn" class="hidden">Cetak</button>
+                <div class="date-range"><label for="start-date">Dari:</label><input type="date" id="start-date"><label for="end-date">Sampai:</label><input type="date" id="end-date"></div>
+                <button id="generate-report-btn">Buat Laporan</button><button id="print-btn" class="hidden">Cetak</button>
             </div>
         </header>
-
-        <main id="report-content" class="report-content">
-            <p class="placeholder">Pilih rentang tanggal dan klik "Buat Laporan" untuk menampilkan data.</p>
-        </main>
+        <main id="report-content" class="report-content"><p class="placeholder">Pilih rentang tanggal untuk menampilkan data.</p></main>
     </div>
-
-    <script src="js/laporan.js"></script>
+    <script type="module" src="js/laporan.js"></script>
 </body>
 </html>

@@ -9,74 +9,31 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
     <nav class="main-nav">
-        <a href="presensi.html">Presensi</a>
-        <a href="log.html" class="active">Log Harian</a>
-        <a href="laporan.html">Laporan</a>
+        <a href="scan.html" id="nav-scan">Pindai QR</a>
+        <a href="log.html" id="nav-log">Log Harian</a>
+        <a href="laporan.html" id="nav-laporan">Laporan</a>
+        <a href="#" id="logout-btn" class="logout">Logout</a>
     </nav>
-
     <div class="dashboard-layout">
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>⭐ Dashboard</h2>
-            </div>
+            <div class="sidebar-header"><h2>⭐ Dashboard</h2></div>
             <div class="sidebar-widgets">
-                <div class="widget">
-                    <h3>Internship Ends In</h3>
-                    <div class="countdown" id="countdown">
-                        <div class="countdown-item">
-                            <span id="days">0</span>
-                            <small>Days</small>
-                        </div>
-                        <div class="countdown-item">
-                            <span id="hours">0</span>
-                            <small>Hours</small>
-                        </div>
-                        <div class="countdown-item">
-                            <span id="minutes">0</span>
-                            <small>Minutes</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="widget">
-                    <h3>📝 To-Do List</h3>
-                    <div class="todo-app">
-                        <ul id="todo-list" class="todo-list"></ul>
-                        <form id="todo-form" class="todo-form">
-                            <input type="text" id="todo-input" placeholder="Tugas baru..." required>
-                            <button type="submit">+</button>
-                        </form>
-                    </div>
-                </div>
+                <div class="widget"><h3>Internship Ends In</h3><div class="countdown" id="countdown"><div class="countdown-item"><span id="days">0</span><small>Days</small></div><div class="countdown-item"><span id="hours">0</span><small>Hours</small></div><div class="countdown-item"><span id="minutes">0</span><small>Minutes</small></div></div></div>
+                <div class="widget"><h3>📝 To-Do List</h3><div class="todo-app"><ul id="todo-list" class="todo-list"></ul><form id="todo-form" class="todo-form"><input type="text" id="todo-input" placeholder="Tugas baru..." required><button type="submit">+</button></form></div></div>
             </div>
         </aside>
-
         <main class="main-content">
             <header class="main-header">
                 <h1>Internship Daily Logbook</h1>
+                <div class="header-actions"><input type="file" id="import-input" class="hidden" accept="application/json"><button id="import-btn">Import (JSON)</button><button id="export-json-btn">Export (JSON)</button><button id="export-csv-btn">Export (Excel)</button></div>
             </header>
-
             <section class="stats-cards">
-                <div class="stat-card">
-                    <h4>Total Log Tercatat</h4>
-                    <p id="total-logs-stat">0</p>
-                </div>
-                <div class="stat-card">
-                    <h4>Jam Kerja (Minggu Ini)</h4>
-                    <p id="total-hours-week-stat">0j 0m</p>
-                </div>
-                <div class="stat-card">
-                    <h4>Jam Kerja (Bulan Ini)</h4>
-                    <p id="total-hours-month-stat">0j 0m</p>
-                </div>
-                <div class="stat-card">
-                    <h4>Jam Kerja (Total)</h4>
-                    <p id="total-hours-all-stat">0j 0m</p>
-                </div>
+                <div class="stat-card"><h4>Total Log</h4><p id="total-logs-stat">0</p></div>
+                <div class="stat-card"><h4>Jam (Minggu Ini)</h4><p id="total-hours-week-stat">0j 0m</p></div>
+                <div class="stat-card"><h4>Jam (Bulan Ini)</h4><p id="total-hours-month-stat">0j 0m</p></div>
+                <div class="stat-card"><h4>Jam (Total)</h4><p id="total-hours-all-stat">0j 0m</p></div>
             </section>
-
             <section class="card">
                 <h2>Tambah atau Edit Entri Log</h2>
                 <form id="log-form">
@@ -85,23 +42,21 @@
                         <div class="form-group"><label for="jam-masuk">Jam Masuk</label><input type="time" id="jam-masuk" required></div>
                         <div class="form-group"><label for="jam-pulang">Jam Pulang</label><input type="time" id="jam-pulang" required></div>
                     </div>
-                    <div class="form-group"><label for="kegiatan">Deskripsi Kegiatan</label><textarea id="kegiatan" placeholder="Jelaskan apa saja yang Anda kerjakan hari ini..." required></textarea></div>
+                    <div class="form-group"><label for="kegiatan">Deskripsi Kegiatan</label><textarea id="kegiatan" required></textarea></div>
                     <div class="form-actions"><button type="submit" id="submit-btn">Tambah Log</button><button type="button" id="cancel-edit-btn" class="hidden">Batal Edit</button></div>
                 </form>
             </section>
-
             <section class="card">
                 <h2>Riwayat Log</h2>
                 <div class="table-wrapper">
                     <table id="log-table">
-                        <thead><tr><th>Tanggal</th><th>Jam Masuk</th><th>Jam Pulang</th><th>Durasi</th><th>Kegiatan</th><th>Aksi</th></tr></thead>
+                        <thead><tr><th>Tanggal</th><th>Masuk</th><th>Pulang</th><th>Durasi</th><th>Kegiatan</th><th>Aksi</th></tr></thead>
                         <tbody id="log-body"></tbody>
                     </table>
                 </div>
             </section>
         </main>
     </div>
-
-    <script src="js/log.js"></script>
+    <script type="module" src="js/log.js"></script>
 </body>
 </html>

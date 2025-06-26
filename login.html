@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Internship Dashboard</title>
+    <link rel="stylesheet" href="css/style-login.css">
+</head>
+<body>
+    <div class="login-container">
+        <!-- Form Login -->
+        <div id="login-view">
+            <h1>Selamat Datang Kembali</h1>
+            <p>Silakan masuk untuk melanjutkan.</p>
+            <form id="login-form">
+                <div class="input-group"><label for="login-username">Email</label><input type="email" id="login-username" required></div>
+                <div class="input-group"><label for="login-password">Password</label><input type="password" id="login-password" required></div>
+                <button type="submit">Login</button>
+            </form>
+            <p class="toggle-link">Belum punya akun? <a href="#" id="show-register">Daftar di sini</a></p>
+        </div>
+        <!-- Form Registrasi -->
+        <div id="register-view" class="hidden">
+            <h1>Buat Akun Baru</h1>
+            <p>Daftarkan diri Anda untuk memulai.</p>
+            <form id="register-form">
+                <div class="input-group"><label for="register-nama">Nama Lengkap</label><input type="text" id="register-nama" required></div>
+                <div class="input-group"><label for="register-username">Email</label><input type="email" id="register-username" required></div>
+                <div class="input-group"><label for="register-password">Password</label><input type="password" id="register-password" required></div>
+                <button type="submit">Daftar</button>
+            </form>
+            <p class="toggle-link">Sudah punya akun? <a href="#" id="show-login">Masuk di sini</a></p>
+        </div>
+    </div>
+    <script type="module" src="js/login.js"></script>
+</body>
+</html>
