@@ -2,6 +2,7 @@ import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 import { doc, getDoc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
+// Penjaga Halaman
 onAuthStateChanged(auth, user => {
     const loader = document.getElementById('loader');
     const pageContent = document.getElementById('page-content');
@@ -29,31 +30,43 @@ function runScanApp(currentUser) {
     const getTodayDocId = () => `${currentUser.uid}_${new Date().toISOString().slice(0, 10)}`;
 
     const checkStatus = async () => {
-        const docId = getTodayDocId();
-        const presenceRef = doc(db, "presence_status", docId);
-        const presenceSnap = await getDoc(presenceRef);
-        const todayPresence = presenceSnap.exists() ? presenceSnap.data() : null;
+        actionBtn.disabled = true;
+        statusEl.textContent = "Memeriksa status...";
+        infoEl.textContent = "";
 
-        resetBtn.classList.add('hidden');
-        if (!todayPresence) {
-            statusEl.textContent = "Siap untuk Bekerja?";
-            infoEl.textContent = "Klik tombol di bawah untuk mencatat jam masuk Anda.";
-            actionBtn.textContent = "Clock In";
-            actionBtn.className = "action-button clock-in";
-            actionBtn.disabled = false;
-        } else if (todayPresence && !todayPresence.jamPulang) {
-            statusEl.textContent = "Anda Sedang Bekerja";
-            infoEl.textContent = `Waktu masuk tercatat pukul: ${todayPresence.jamMasuk}`;
-            actionBtn.textContent = "Clock Out";
-            actionBtn.className = "action-button clock-out";
-            actionBtn.disabled = false;
-        } else {
-            statusEl.textContent = "Presensi Hari Ini Selesai";
-            infoEl.textContent = `Masuk: ${todayPresence.jamMasuk} | Pulang: ${todayPresence.jamPulang}`;
-            actionBtn.textContent = "Selesai";
-            actionBtn.className = "action-button";
+        // DIBUNGKUS DENGAN TRY...CATCH
+        try {
+            const docId = getTodayDocId();
+            const presenceRef = doc(db, "presence_status", docId);
+            const presenceSnap = await getDoc(presenceRef);
+            const todayPresence = presenceSnap.exists() ? presenceSnap.data() : null;
+
+            resetBtn.classList.add('hidden');
+            if (!todayPresence) {
+                statusEl.textContent = "Siap untuk Bekerja?";
+                infoEl.textContent = "Klik tombol di bawah untuk mencatat jam masuk Anda.";
+                actionBtn.textContent = "Clock In";
+                actionBtn.className = "action-button clock-in";
+                actionBtn.disabled = false;
+            } else if (todayPresence && !todayPresence.jamPulang) {
+                statusEl.textContent = "Anda Sedang Bekerja";
+                infoEl.textContent = `Waktu masuk tercatat pukul: ${todayPresence.jamMasuk}`;
+                actionBtn.textContent = "Clock Out";
+                actionBtn.className = "action-button clock-out";
+                actionBtn.disabled = false;
+            } else {
+                statusEl.textContent = "Presensi Hari Ini Selesai";
+                infoEl.textContent = `Masuk: ${todayPresence.jamMasuk} | Pulang: ${todayPresence.jamPulang}`;
+                actionBtn.textContent = "Selesai";
+                actionBtn.className = "action-button";
+                actionBtn.disabled = true;
+                resetBtn.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error("Gagal memeriksa status presensi:", error);
+            statusEl.textContent = "Gagal Memuat Status";
+            infoEl.textContent = "Terjadi kesalahan jaringan. Coba muat ulang halaman.";
             actionBtn.disabled = true;
-            resetBtn.classList.remove('hidden');
         }
     };
 
@@ -63,17 +76,18 @@ function runScanApp(currentUser) {
         const currentTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
         const docId = getTodayDocId();
         const presenceRef = doc(db, "presence_status", docId);
-        const presenceSnap = await getDoc(presenceRef);
-        const todayPresence = presenceSnap.exists() ? presenceSnap.data() : null;
 
         try {
-            if (!todayPresence) {
+            const presenceSnap = await getDoc(presenceRef);
+            const todayPresence = presenceSnap.exists() ? presenceSnap.data() : null;
+
+            if (!todayPresence) { // Aksi untuk Clock In
                 await setDoc(presenceRef, {
                     jamMasuk: currentTime, jamPulang: null, logId: null,
                     displayName: currentUser.displayName, tanggal: todayString,
                 });
                 alert(`Berhasil Clock In pada jam ${currentTime}`);
-            } else if (todayPresence && !todayPresence.jamPulang) {
+            } else if (todayPresence && !todayPresence.jamPulang) { // Aksi untuk Clock Out
                 const newLogId = Date.now().toString();
                 await updateDoc(presenceRef, { jamPulang: currentTime, logId: newLogId });
                 const newLog = {
@@ -85,10 +99,14 @@ function runScanApp(currentUser) {
                 await setDoc(doc(db, "logs", newLogId), newLog);
                 alert(`Berhasil Clock Out pada jam ${currentTime}.`);
             }
-        } catch (error) { console.error("Error:", error); alert("Terjadi kesalahan."); } 
-        finally { checkStatus(); }
+        } catch (error) {
+            console.error("Error saat presensi:", error);
+            alert("Terjadi kesalahan. Silakan coba lagi.");
+        } finally {
+            checkStatus();
+        }
     };
-
+    
     const resetPresence = async () => {
         if (confirm("Yakin ingin mereset presensi hari ini? Log terkait juga akan dihapus.")) {
             const docId = getTodayDocId();
@@ -96,14 +114,20 @@ function runScanApp(currentUser) {
             const presenceSnap = await getDoc(presenceRef);
             if (presenceSnap.exists()) {
                 const presenceData = presenceSnap.data();
-                if (presensiData.logId) await deleteDoc(doc(db, "logs", presensiData.logId));
-                await deleteDoc(presenceRef);
-                alert("Presensi hari ini telah direset.");
-                checkStatus();
+                try {
+                    if (presensiData.logId) await deleteDoc(doc(db, "logs", presensiData.logId));
+                    await deleteDoc(presenceRef);
+                    alert("Presensi hari ini telah direset.");
+                } catch (err) {
+                    console.error("Gagal mereset:", err);
+                    alert("Gagal mereset data.");
+                } finally {
+                    checkStatus();
+                }
             }
         }
     };
-    
+
     const calculateDuration = (startTime, endTime) => {
         const start = new Date(`1970-01-01T${startTime}`); const end = new Date(`1970-01-01T${endTime}`);
         if (end < start) return { totalMinutes: 0, text: "0j 0m" };
