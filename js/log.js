@@ -238,7 +238,7 @@ function runLogApp(currentUser) {
     
     // --- MODUL COUNTDOWN ---
     const countdownModule = (() => {
-        const endDate = new Date("December 31, 2025 17:00:00").getTime();
+        const endDate = new Date("August 31, 2025 17:00:00").getTime();
         const daysEl = document.getElementById('days'); const hoursEl = document.getElementById('hours'); const minutesEl = document.getElementById('minutes');
         const update = () => {
             const now = new Date().getTime(); const distance = endDate - now;
