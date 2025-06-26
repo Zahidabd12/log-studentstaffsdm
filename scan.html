@@ -8,27 +8,34 @@
     <link rel="stylesheet" href="css/style-scan.css">
 </head>
 <body>
-    <nav class="main-nav">
-        <a href="scan.html" id="nav-scan">Pindai QR</a>
-        <a href="log.html" id="nav-log">Log Harian</a>
-        <a href="laporan.html" id="nav-laporan">Laporan</a>
-        <a href="#" id="logout-btn" class="logout">Logout</a>
-    </nav>
-    <div class="container">
-        <header><h1>Pemindai Presensi</h1></header>
-        <main class="presence-box">
-            <div id="status-display">
-                <p class="status-text" id="presence-status">Memeriksa status...</p>
-                <p class="info-text" id="presence-info"></p>
-                <button id="reset-button" class="reset-button hidden">Reset Presensi Hari Ini</button>
-            </div>
-            <div id="camera-container" class="hidden">
-                <video id="camera-feed" playsinline></video>
-                <div class="camera-overlay"><div class="scan-box"></div></div>
-                <button id="cancel-scan-btn">Batal</button>
-            </div>
-            <button id="scan-button" class="action-button" disabled>Memuat...</button>
-        </main>
+    <div id="loader" class="loader-container">
+        <div class="spinner"></div>
+        <p>Memverifikasi sesi...</p>
+    </div>
+
+    <div id="page-content" style="display: none;">
+        <nav class="main-nav">
+            <a href="scan.html" id="nav-scan">Pindai QR</a>
+            <a href="log.html" id="nav-log">Log Harian</a>
+            <a href="laporan.html" id="nav-laporan">Laporan</a>
+            <a href="#" id="logout-btn" class="logout">Logout</a>
+        </nav>
+        <div class="container">
+            <header><h1>Pemindai Presensi</h1></header>
+            <main class="presence-box">
+                <div id="status-display">
+                    <p class="status-text" id="presence-status">Memeriksa status...</p>
+                    <p class="info-text" id="presence-info"></p>
+                    <button id="reset-button" class="reset-button hidden">Reset Presensi Hari Ini</button>
+                </div>
+                <div id="camera-container" class="hidden">
+                    <video id="camera-feed" playsinline></video>
+                    <div class="camera-overlay"><div class="scan-box"></div></div>
+                    <button id="cancel-scan-btn">Batal</button>
+                </div>
+                <button id="scan-button" class="action-button" disabled>Memuat...</button>
+            </main>
+        </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script type="module" src="js/scan.js"></script>
