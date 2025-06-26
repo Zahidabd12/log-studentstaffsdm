@@ -2,30 +2,18 @@ import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 import { doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
-// Hanya ada satu event listener utama
-document.addEventListener('DOMContentLoaded', () => {
-    // Ambil elemen loader dan konten utama
+onAuthStateChanged(auth, user => {
     const loader = document.getElementById('loader');
     const pageContent = document.getElementById('page-content');
-
-    // Penjaga halaman
-    onAuthStateChanged(auth, user => {
-        if (user) {
-            // JIKA LOGIN BERHASIL:
-            // 1. Sembunyikan loader
-            loader.style.display = 'none';
-            // 2. Tampilkan konten halaman
-            pageContent.style.display = 'block';
-            // 3. Jalankan semua fungsi aplikasi
-            runScanApp(user);
-        } else {
-            // Jika tidak login, arahkan ke halaman login
-            window.location.replace('login.html');
-        }
-    });
+    if (user) {
+        loader.style.display = 'none';
+        pageContent.style.display = 'block';
+        runScanApp(user);
+    } else {
+        window.location.replace('login.html');
+    }
 });
 
-// Seluruh logika aplikasi sekarang dibungkus dalam satu fungsi utama
 function runScanApp(currentUser) {
     const statusEl = document.getElementById('presence-status');
     const infoEl = document.getElementById('presence-info');
@@ -65,7 +53,7 @@ function runScanApp(currentUser) {
         }
     };
 
-    const startScanner = (mode) => {
+    const startScanner = () => {
         navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
             .then(s => {
                 stream = s;
@@ -74,8 +62,8 @@ function runScanApp(currentUser) {
                 cameraContainer.classList.remove('hidden');
                 document.getElementById('status-display').classList.add('hidden');
                 scanBtn.classList.add('hidden');
-                requestAnimationFrame(() => tick(mode));
-            }).catch(err => alert("Tidak dapat mengakses kamera. Pastikan Anda memberikan izin."));
+                requestAnimationFrame(tick);
+            }).catch(() => alert("Tidak dapat mengakses kamera. Pastikan Anda memberikan izin."));
     };
     
     const stopScanner = () => {
@@ -85,53 +73,49 @@ function runScanApp(currentUser) {
         scanBtn.classList.remove('hidden');
     };
 
-    const tick = (mode) => {
+    const tick = () => {
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth; canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const code = jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height);
-            if (code) { handleQRCode(code.data, mode); return; }
+            if (code) { handleQRCode(code.data); return; }
         }
-        if (stream) { requestAnimationFrame(() => tick(mode)); }
+        if (stream) { requestAnimationFrame(tick); }
     };
 
-    const handleQRCode = async (data, mode) => {
+    const handleQRCode = async (data) => {
         stopScanner();
         const todayString = new Date().toISOString().slice(0, 10);
         const expectedClockIn = `PRESENSI_MASUK_${todayString}`;
         const expectedClockOut = `PRESENSI_PULANG_${todayString}`;
         const currentTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        
+        const todayKey = getTodayKey();
+        const todayPresence = JSON.parse(localStorage.getItem(todayKey));
         let notificationData = null;
 
         try {
-            if (mode === 'clock-in' && data === expectedClockIn) {
-                localStorage.setItem(getTodayKey(), JSON.stringify({ jamMasuk: currentTime, jamPulang: null, logId: null }));
+            if (data === expectedClockIn && !todayPresence) {
+                localStorage.setItem(todayKey, JSON.stringify({ jamMasuk: currentTime, jamPulang: null, logId: null }));
                 notificationData = { type: 'clock-in', nama: currentUser.displayName };
                 alert(`Berhasil Clock In pada jam ${currentTime}`);
-            } else if (mode === 'clock-out' && data === expectedClockOut) {
-                const todayPresence = JSON.parse(localStorage.getItem(getTodayKey()));
-                if (!todayPresence || todayPresence.jamPulang) { alert("Status presensi tidak valid untuk Clock Out."); checkStatus(); return; }
-                
+            } else if (data === expectedClockOut && todayPresence && !todayPresence.jamPulang) {
                 const newLogId = Date.now().toString();
-                todayPresence.jamPulang = currentTime;
-                todayPresence.logId = newLogId;
-                localStorage.setItem(getTodayKey(), JSON.stringify(todayPresence));
-
+                const updatedPresence = { ...todayPresence, jamPulang: currentTime, logId: newLogId };
+                localStorage.setItem(todayKey, JSON.stringify(updatedPresence));
                 const newLog = {
-                    tanggal: todayString, jamMasuk: todayPresence.jamMasuk, jamPulang: todayPresence.jamPulang,
-                    durasi: calculateDuration(todayPresence.jamMasuk, todayPresence.jamPulang),
+                    tanggal: todayString, jamMasuk: updatedPresence.jamMasuk, jamPulang: updatedPresence.jamPulang,
+                    durasi: calculateDuration(updatedPresence.jamMasuk, updatedPresence.jamPulang),
                     kegiatan: "Aktivitas harian tercatat melalui presensi QR.",
                     userId: currentUser.uid
                 };
-
                 await setDoc(doc(db, "logs", newLogId), newLog);
                 notificationData = { type: 'clock-out', nama: currentUser.displayName };
                 alert(`Berhasil Clock Out pada jam ${currentTime}.`);
-
             } else {
-                alert("QR Code tidak valid atau tidak sesuai.");
+                alert("QR Code tidak valid atau status presensi tidak sesuai.");
             }
         } catch (error) {
             console.error("Error handling QR Code: ", error);
@@ -139,7 +123,7 @@ function runScanApp(currentUser) {
         } finally {
             if (notificationData) { 
                 localStorage.setItem('lastPresenceActivity', JSON.stringify(notificationData)); 
-                setTimeout(() => localStorage.removeItem('lastPresenceActivity'), 500); 
+                setTimeout(() => localStorage.removeItem('lastPresenceActivity'), 1000); 
             }
             checkStatus();
         }
@@ -157,46 +141,21 @@ function runScanApp(currentUser) {
         if (confirm("Yakin ingin mereset presensi hari ini? Log terkait juga akan dihapus.")) {
             const todayPresence = JSON.parse(localStorage.getItem(getTodayKey()));
             if (todayPresence && todayPresence.logId) {
-                deleteDoc(doc(db, "logs", todayPresence.logId))
-                    .then(() => {
-                        localStorage.removeItem(getTodayKey());
-                        alert("Presensi hari ini telah direset.");
-                        checkStatus();
-                    })
-                    .catch(error => console.error("Gagal menghapus log:", error));
-            } else {
-                localStorage.removeItem(getTodayKey());
-                checkStatus();
+                deleteDoc(doc(db, "logs", todayPresence.logId)).catch(err => console.error("Gagal hapus log:", err));
             }
+            localStorage.removeItem(getTodayKey());
+            alert("Presensi hari ini telah direset.");
+            checkStatus();
         }
     };
 
-    scanBtn.addEventListener('click', () => {
-        const todayPresence = JSON.parse(localStorage.getItem(getTodayKey()));
-        if (!todayPresence) { startScanner('clock-in'); } 
-        else if (!todayPresence.jamPulang) { startScanner('clock-out'); }
-    });
-    
+    scanBtn.addEventListener('click', startScanner);
     resetBtn.addEventListener('click', resetPresence);
     cancelScanBtn.addEventListener('click', stopScanner);
-
-    if (logoutBtn) { 
-        logoutBtn.addEventListener('click', (e) => { 
-            e.preventDefault(); 
-            if (confirm('Apakah Anda yakin ingin logout?')) { 
-                signOut(auth).then(() => {
-                    window.location.replace('login.html');
-                }).catch(error => console.error("Logout error:", error)); 
-            } 
-        }); 
-    }
+    logoutBtn.addEventListener('click', (e) => { e.preventDefault(); if (confirm('Yakin logout?')) { signOut(auth).then(() => window.location.replace('login.html')).catch(err => console.error(err)); } });
     
     const currentPage = window.location.pathname.split('/').pop();
-    if (currentPage === 'scan.html') {
-        const navScan = document.getElementById('nav-scan');
-        if(navScan) navScan.classList.add('active');
-    }
-
-    // Panggil checkStatus untuk pertama kali saat aplikasi dijalankan
+    if (currentPage === 'scan.html') document.getElementById('nav-scan').classList.add('active');
+    
     checkStatus();
 }

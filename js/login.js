@@ -1,10 +1,5 @@
 import { auth } from './firebase-config.js';
-import { 
-    onAuthStateChanged, 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword,
-    updateProfile 
-} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
+import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginView = document.getElementById('login-view');
@@ -26,11 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const nama = document.getElementById('register-nama').value;
         const email = document.getElementById('register-username').value;
         const password = document.getElementById('register-password').value;
-
         createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
-                return updateProfile(userCredential.user, { displayName: nama });
-            })
+            .then(userCredential => updateProfile(userCredential.user, { displayName: nama }))
             .then(() => {
                 alert('Registrasi berhasil! Silakan login.');
                 registerForm.reset();
@@ -44,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = document.getElementById('login-username').value;
         const password = document.getElementById('login-password').value;
         signInWithEmailAndPassword(auth, email, password)
-            .then(() => window.location.href = 'log.html')
+            .then(() => { window.location.href = 'log.html' })
             .catch(() => alert('Email atau password salah!'));
     });
 });
