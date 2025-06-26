@@ -26,20 +26,29 @@ function runLaporanApp(currentUser) {
         const endDate = endDateEl.value;
         if (!startDate || !endDate) { alert("Pilih rentang tanggal."); return; }
         reportContentEl.innerHTML = `<p class="placeholder">Membuat laporan...</p>`;
-        const q = query(collection(db, "logs"), where('userId', '==', currentUser.uid), where('tanggal', '>=', startDate), where('tanggal', '<=', endDate), orderBy('tanggal', 'asc'));
-        const querySnapshot = await getDocs(q);
-        const filteredLogs = querySnapshot.docs.map(doc => doc.data());
-        if (filteredLogs.length === 0) {
-            reportContentEl.innerHTML = `<p class="placeholder">Tidak ada data.</p>`;
-            printBtn.classList.add('hidden'); return;
+        
+        try {
+            const q = query(collection(db, "logs"), where('userId', '==', currentUser.uid), where('tanggal', '>=', startDate), where('tanggal', '<=', endDate), orderBy('tanggal', 'asc'));
+            const querySnapshot = await getDocs(q);
+            const filteredLogs = querySnapshot.docs.map(doc => doc.data());
+
+            if (filteredLogs.length === 0) {
+                reportContentEl.innerHTML = `<p class="placeholder">Tidak ada data log pada rentang tanggal yang dipilih.</p>`;
+                printBtn.classList.add('hidden');
+                return;
+            }
+            renderReport(filteredLogs, startDate, endDate);
+            printBtn.classList.remove('hidden');
+        } catch (error) {
+            console.error("Error generating report: ", error);
+            reportContentEl.innerHTML = `<p class="placeholder" style="color: red;">Gagal membuat laporan. Pastikan Anda sudah membuat index di Firestore.</p>`;
         }
-        renderReport(filteredLogs, startDate, endDate);
-        printBtn.classList.remove('hidden');
     });
     
     printBtn.addEventListener('click', () => window.print());
+
     const renderReport = (logs, startDate, endDate) => {
-        const totalMinutes = logs.reduce((sum, log) => sum + log.durasi.totalMinutes, 0);
+        const totalMinutes = logs.reduce((sum, log) => sum + (log.durasi.totalMinutes || 0), 0);
         const totalHours = Math.floor(totalMinutes / 60);
         const remainingMinutes = totalMinutes % 60;
         reportContentEl.innerHTML = `

@@ -2,6 +2,7 @@ import { auth, db } from './firebase-config.js';
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 import { doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
+// Penjaga Halaman
 onAuthStateChanged(auth, user => {
     const loader = document.getElementById('loader');
     const pageContent = document.getElementById('page-content');

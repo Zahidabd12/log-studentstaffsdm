@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebas
 import { getAuth } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
 
+// Ganti dengan konfigurasi proyek Firebase Anda
 const firebaseConfig = {
   apiKey: "AIzaSyAx4LzXuuoWlXZyHANk53OQsPaJTIgA87I",
   authDomain: "internship-logbook-eadfa.firebaseapp.com",
@@ -11,6 +12,9 @@ const firebaseConfig = {
   appId: "1:129663315307:web:c698a46cd86f7ca6aff02e"
 };
 
+// Inisialisasi Firebase
 const app = initializeApp(firebaseConfig);
+
+// Ekspor layanan Firebase yang akan digunakan di file lain
 export const auth = getAuth(app);
 export const db = getFirestore(app);
