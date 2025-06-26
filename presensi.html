@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presensi Kehadiran</title>
+    <link rel="stylesheet" href="css/style-nav.css">
+    <link rel="stylesheet" href="css/style-presensi.css">
+</head>
+<body>
+    <nav class="main-nav">
+        <a href="presensi.html" class="active">Presensi</a>
+        <a href="log.html">Log Harian</a>
+        <a href="laporan.html">Laporan</a>
+    </nav>
+
+    <div id="intern-view" class="container">
+        <header>
+            <h1>Presensi Kehadiran</h1>
+            <p id="current-time" class="live-clock"></p>
+        </header>
+
+        <main class="presence-box">
+            <div id="status-display">
+                <p class="status-text" id="presence-status">Memeriksa status presensi...</p>
+                <p class="info-text" id="presence-info"></p>
+                <button id="reset-button" class="reset-button hidden">Reset Presensi Hari Ini</button>
+            </div>
+
+            <div id="camera-container" class="hidden">
+                <video id="camera-feed" playsinline></video>
+                <div class="camera-overlay">
+                    <div class="scan-box"></div>
+                </div>
+                <button id="cancel-scan-btn">Batal</button>
+            </div>
+            
+            <button id="scan-button" class="action-button" disabled>Memuat...</button>
+        </main>
+    </div>
+
+    <div id="mentor-view" class="container hidden">
+         <header>
+            <h1>Generator QR Presensi</h1>
+            <p>Tunjukkan QR Code yang sesuai kepada intern untuk melakukan presensi.</p>
+            <p id="current-date" class="live-clock"></p>
+        </header>
+        <main class="qr-container">
+            <div class="qr-card">
+                <h2>Clock In</h2>
+                <div id="qr-masuk" class="qr-code"></div>
+                <p class="qr-text" id="text-masuk"></p>
+            </div>
+            <div class="qr-card">
+                <h2>Clock Out</h2>
+                <div id="qr-pulang" class="qr-code"></div>
+                <p class="qr-text" id="text-pulang"></p>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.js"></script>
+    <script src="js/presensi.js"></script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator QR Presensi</title>
+    <link rel="stylesheet" href="css/style-generator.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Generator QR Presensi</h1>
+        <p>Tunjukkan QR Code yang sesuai kepada intern untuk melakukan presensi.</p>
+        <p class="date" id="current-date"></p>
+        <div class="qr-container">
+            <div class="qr-card">
+                <h2>Clock In</h2>
+                <div id="qr-masuk" class="qr-code"></div>
+            </div>
+            <div class="qr-card">
+                <h2>Clock Out</h2>
+                <div id="qr-pulang" class="qr-code"></div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator/qrcode.js"></script>
+    <script src="js/generator.js"></script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+body { font-family: sans-serif; background-color: #333; color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+.container { text-align: center; background-color: #444; padding: 40px; border-radius: 12px; }
+.date { font-size: 1.2rem; margin-bottom: 30px; }
+.qr-container { display: flex; gap: 40px; }
+.qr-card { text-align: center; }
+.qr-code { background: white; padding: 15px; border-radius: 8px; }

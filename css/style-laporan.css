@@ -1,0 +1,25 @@
+/* style-laporan.css */
+body { font-family: sans-serif; background-color: #f4f7f9; margin: 0; }
+.container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
+.report-header { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.filter-controls { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; margin-top: 15px; }
+.date-range { display: flex; gap: 10px; align-items: center; }
+input[type="date"] { padding: 8px; border: 1px solid #ccc; border-radius: 5px; }
+button { padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; background-color: #007bff; color: white; font-weight: bold; }
+#print-btn { background-color: #6c757d; }
+.report-content { background: white; padding: 30px; min-height: 400px; }
+.placeholder { color: #888; text-align: center; font-size: 1.2rem; }
+.report-title { text-align: center; margin-bottom: 30px; }
+.summary-table, .detail-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px; }
+.summary-table td { padding: 10px; border: 1px solid #eee; }
+.summary-table td:first-child { font-weight: bold; width: 30%; }
+.detail-table th, .detail-table td { padding: 12px; border: 1px solid #ddd; text-align: left; }
+.detail-table th { background-color: #f2f2f2; }
+.hidden { display: none; }
+
+@media print {
+    body { background-color: white; padding-top: 0; }
+    .main-nav, .report-header { display: none; }
+    .container { max-width: 100%; margin: 0; padding: 0; }
+    .report-content { box-shadow: none; border: none; }
+}
