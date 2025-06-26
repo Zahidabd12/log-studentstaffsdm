@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplikasi Presensi</title>
+    <title>Pindai QR</title>
     <link rel="stylesheet" href="css/style-nav.css">
     <link rel="stylesheet" href="css/style-scan.css">
 </head>
@@ -13,7 +13,7 @@
     </div>
     <div id="page-content" style="display: none;">
         <nav class="main-nav">
-            <a href="scan.html" id="nav-scan">Presensi</a>
+            <a href="scan.html" id="nav-scan">Pindai QR</a>
             <a href="log.html" id="nav-log">Log Harian</a>
             <a href="laporan.html" id="nav-laporan">Laporan</a>
             <a href="#" id="logout-btn" class="logout">Logout</a>
@@ -21,16 +21,23 @@
         <div class="container">
             <header>
                 <h1 id="welcome-message">Selamat Datang</h1>
-                <p class="live-clock" id="live-clock-intern"></p>
             </header>
             <main class="presence-box">
-                <p class="status-text" id="presence-status">Memeriksa status...</p>
-                <p class="info-text" id="presence-info"></p>
-                <button id="action-button" class="action-button" disabled>Memuat...</button>
-                <button id="reset-button" class="reset-button hidden">Reset Presensi Hari Ini</button>
+                <div id="status-display">
+                    <p class="status-text" id="presence-status">Memeriksa status...</p>
+                    <p class="info-text" id="presence-info"></p>
+                    <button id="reset-button" class="reset-button hidden">Reset Presensi Hari Ini</button>
+                </div>
+                <div id="camera-container" class="hidden">
+                    <video id="camera-feed" playsinline></video>
+                    <div class="camera-overlay"><div class="scan-box"></div></div>
+                    <button id="cancel-scan-btn">Batal</button>
+                </div>
+                <button id="scan-button" class="action-button" disabled>Memuat...</button>
             </main>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
     <script type="module" src="js/scan.js"></script>
 </body>
 </html>
